@@ -1,0 +1,15 @@
+<?xml version="1.0"?>   
+<layout version="0.1.0">   
+  <crowdfundtwo_index_index>   
+    <reference name="root">   
+      <action method="setTemplate"><template>page/2columns-right.phtml</template></action>   
+    </reference>
+    <reference name="right">   
+      <block type="crowdfundtwo/right" name="crowdfundtwo_right" template="crowdfundtwo/right.phtml"/>   
+    </reference>   
+    <reference name="content">   
+      <block type="crowdfundtwo/index" name="crowdfundtwo_index" template="crowdfundtwo/index.phtml"/>   
+    </reference>   
+  </crowdfundtwo_index_index>   
+</layout>   
+	

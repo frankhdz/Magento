@@ -1,0 +1,39 @@
+<?php 
+//let's get the customer credit info
+
+$user = Mage::getSingleton('customer/session')->getCustomer();
+
+$email = $user->getEmail();
+
+$crowdfundcustomercollection = Mage::getModel('crowdfund/customercredit')
+->getCollection()
+->addFieldToFilter('customer_email',$email);
+
+
+?>
+
+
+<div class="page-title">
+    <h1>My Project Credits</h1>
+</div>
+
+<?php 
+
+foreach($crowdfundcustomercollection as $project):
+    //get the project from project id
+    $_projectcollection = Mage::getModel('crowdfund/crowdfundmodel')
+    ->getCollection()
+    ->addFieldToFilter('id',$project->getData('project_id'))
+    ->getFirstItem();
+
+
+
+?>
+
+<div class="backed_project">
+	<div id="project_name"><STRONG>Project:</STRONG> <?php echo $_projectcollection->getData('project_name') ?></div>
+    <div id="project_credit"><STRONG>Remaining:</STRONG> <?php echo  Mage::helper('core')->currency($project->getData('credit_amount'), true, false); ?> </div>
+</div>
+
+<?php endforeach; ?>
+

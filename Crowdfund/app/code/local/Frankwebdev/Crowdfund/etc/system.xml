@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<config>
+	  <tabs>
+		<crowdfund translate="label" module="crowdfund">
+            <label>Crowd Fund Project</label>
+            <sort_order>5</sort_order>
+        </crowdfund>
+	  </tabs>
+	  <sections>
+		<crowdfundsettings  translate="label" module="crowdfund">                    
+		<label>Settings</label>
+		<tab>crowdfund</tab>
+		<frontend_type>text</frontend_type>
+		<sort_order>5</sort_order>
+		<show_in_default>1</show_in_default>
+		<show_in_website>1</show_in_website>
+		<show_in_store>1</show_in_store>            
+					<groups>
+				      <config translate="label"> 
+					  <label>Configuration</label>
+					  <frontend_type>text</frontend_type>
+					  <sort_order>0</sort_order>
+					  <show_in_default>1</show_in_default>
+					  <show_in_website>1</show_in_website>
+					  <show_in_store>1</show_in_store>
+				       <fields>
+                         <!--  
+                         <s_one translate="label">
+                            <label>Settings One</label>
+							               <frontend_type>text</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							               <comment>cc</comment>
+                          </s_one>
+                          <s_two translate="label">
+                            <label>Settings Two</label>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">catalog/product/watermark</upload_dir>
+                            <base_url type="media" scope_info="1">catalog/product/watermark</base_url>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							<comment>cc</comment>
+                          </s_two>
+                          <s_three translate="label">
+                            <label>Settings Three</label>
+							<frontend_type>password</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							<comment>cc</comment>
+                          </s_three> -->
+                          <enable_module translate="label">
+                            <label>Enable Module In Front End</label>
+                            <frontend_type>radios</frontend_type>
+                            <source_model>adminhtml/system_config_source_enabledisable</source_model>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                           <comment>Enable the front end functions for this module</comment>
+                          </enable_module>
+                          <can_back_multiple translate="label">
+                            <label>Can Back Same Project Multiple Times</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							             <comment>User can back the same project multiple times during separate sessions.</comment>
+                          </can_back_multiple>
+
+                          <send_import_order_email translate="label">
+                            <label>Send import email</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                           <comment>Send user confirmation email when order is imported.</comment>
+                          </send_import_order_email>
+
+                          <new_customer_email_template translate="label">
+                            <label>New Customer Email Template</label>
+                             <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                             <comment>Set the name of the email template to use when creating a new user.</comment>
+                          </new_customer_email_template>
+
+                          <new_order_email_template translate="label">
+                            <label>New Order Email Template</label>
+                             <frontend_type>text</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                             <comment>Set the name of the email template to use when importing orders from kickstarter.</comment>
+                          </new_order_email_template>
+                          <send_email_time>
+                              <label>Time to Send Emails</label>
+                              <frontend_type>time</frontend_type>
+                              <sort_order>6</sort_order>
+                              <show_in_default>1</show_in_default>
+                              <show_in_website>1</show_in_website>
+                              <show_in_store>1</show_in_store>
+                              <comment>Cron tab has to be set up to run this properly.</comment>                    
+                          </send_email_time> 
+
+                          <user_management translate="label">
+                            <label>Enable User Management</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                           <comment>Enable Crowdfund User Management (not implemented yet)</comment>
+                          </user_management>
+                          <row_count translate="label">
+                            <label>Display per row</label>
+                              <frontend_type>text</frontend_type>
+                                            <sort_order>3</sort_order>
+                                            <show_in_default>1</show_in_default>
+                                            <show_in_website>1</show_in_website>
+                                            <show_in_store>1</show_in_store>
+                              <comment>Display X per row in front end</comment>
+                          </row_count>
+
+					   </fields>
+					   </config>
+					</groups>
+		</crowdfundsettings>
+	  </sections>
+</config>

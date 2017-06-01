@@ -1,0 +1,355 @@
+<?php 
+
+
+$project_id = Mage::app()->getRequest()->getParam('id');
+$project = Mage::getModel('crowdfund/crowdfundmodel')->load($project_id);
+$project_image = $project->getData('project_image');
+$project_end_date = $project->getData('project_end');
+$project_goal = $project->getData('goal');
+$project_add = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).Mage::app()->getRequest()->getModuleName()."/project/support/id/".$project_id;
+$can_purchase = 1;
+
+//is customer logged in? if yes get the user's email address
+if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+	
+	Mage::log('A USER IS LOGGED IN!!!!!');
+	$customerData = Mage::getSingleton('customer/session')->getCustomer();
+	$customerEmail = $customerData->getEmail();
+}
+
+?>
+<script>
+	var $j = jQuery.noConflict(); 
+
+	$j(document).ready(function() {
+    $j('.project_nav .tab-links a').on('click', function(e)  {
+        var currentAttrValue = $j(this).attr('href');
+ 		
+        // Show/Hide Tabs
+        $j('.project_nav ' + currentAttrValue).show().siblings().hide();
+ 
+        // Change/remove current tab to active
+        $j(this).parent('li').addClass('pro-active').siblings().removeClass('pro-active');
+ 
+        e.preventDefault();
+    });
+});
+
+
+</script>
+<div id="project-title"><?php echo $project->getData('project_name') ?>
+</div>
+<div id="project-wrapper">
+	<div class="project_nav">
+		<ul class="tab-links">
+			<li class="pro-active"><a href="#projecthome" >Home</a></li>
+			<!-- <li><a href="#backers" >Backers</a></li>
+			<li><a href="#comments" >Comments</a></li> -->
+			<li><a href="#rewards" >Rewards</a></li>
+            <li><a href="#addons" >Addons</a></li>
+
+		</ul>
+        
+	
+	    <div class="separator">&nbsp;</div>
+		<div id="project-content-view">
+	    <div id="projecthome" class="tab active">
+	    <div id="imgholder">
+	    	<img src="<?php echo str_replace(' ','_', Mage::helper('crowdfund')->resizeImage($project_image, 640, 390, 'projects')); ?>" alt="resized image" />
+		</div>
+				<div id="cms"><?php echo $project->getData('project_cms') ?>
+                </div>
+	     </div>
+	     <div id="backers" class="tab">
+		 
+
+
+
+
+
+		 </div>
+		<div id="comments" class="tab">
+		</div>
+	    <div id="rewards" class="tab">
+
+	    	<?php 
+		 //render project options here
+			
+			 $productcollection = Mage::getModel('crowdfund/projectproducts')
+						 ->getCollection()
+						 ->setOrder('position', 'ASC');
+						 $productcollection->addFieldToFilter('project_id',$project_id);
+
+						 $icount = 0;
+						 $isodd = 0;
+						 $count = count($productcollection);
+						 Mage::log($count);
+						 foreach($productcollection as $pproduct){
+						 	$icount++;
+						 	$product_id = $pproduct->getData('product_id');
+						 	
+						 	$product = Mage::getModel('catalog/product')->load($product_id);
+						 	$status = $product->getStatus();
+
+						 	//Mage::log("PRODUCT STATUS : ".$status); 
+						 	
+								$value = 
+								$product
+								->getResource()
+								->getAttribute('crowdfundminpledge')
+								->getFrontend()
+								->getValue($product);
+
+						 	 	$isreward = 
+						 	 	$product
+						 	 	->getResource()
+						 	 	->getAttribute('crowdfund_isreward')
+						 	 	->getFrontend()
+						 	 	->getValue($product);
+						 	 
+							if($status==1 && $isreward=="Yes"){
+								if( $isodd == 0){
+									 $isodd = 1;
+									 $is_odd = " oddrow";
+								}else{
+									 $isodd = 0;
+									 $is_odd = " evenrow";
+								}
+						 ?>
+							 <div class="project-product-wrapper<?php echo $is_odd; ?>">
+							 	<div id="sel">
+							 	<div class="pimage">
+							 		<img src="<?php echo $this->helper('catalog/image')->init($product, 'small_image')->resize(135); ?>" width="135" height="135" alt="<?php echo $this->stripTags($this->getImageLabel($product, 'small_image'), null, true) ?>" />
+							 	</div>		
+							 	<?php echo  Mage::helper('core')->currency($value, true, false) ?>+</div>
+							 	<div id="name"><?php echo $product->getName(); ?></div>
+							 	<div id="short-description"><?php echo $product->getShortDescription(); ?></div>
+							 		<div class="children-wrapper">
+							 		<?php
+							 			//cycle associated  bundle products
+							 			$children = $product->getTypeInstance(true)->getChildrenIds($product->getId(), false);
+							 			//Mage::log($children);
+							 			if($product->getTypeId()==='bundle'){
+							 			foreach($children as $child=>$val){
+
+							 				$id_val = array_values($val);
+							 				//Mage::log($id_val[0]);
+							 				//get child description
+							 				$child_product = Mage::getModel('catalog/product')->load($id_val);
+
+							 				?>
+							 				
+							 				<div id="cp_name">Product Name <?php echo $child_product->getName(); ?> </div>
+
+									
+							 			<? };
+							 			};
+
+							 		 ?>
+							 		</div>
+
+							<div class="clear">&nbsp;</div>
+							</div>
+						<?php }; ?>
+						 
+					<?php } ?>
+
+		</div>
+        
+        <div id="addons" class="tab">
+
+	    	<?php 
+		 //render project options here
+			
+			 $productcollection = Mage::getModel('crowdfund/projectproducts')
+						 ->getCollection()
+						 ->setOrder('position', 'ASC');
+						 $productcollection->addFieldToFilter('project_id',$project_id);
+
+						 $icount = 0;
+
+						 $count = count($productcollection);
+						 Mage::log($count);
+						 $isodd = 0;
+						 foreach($productcollection as $pproduct){
+						 	$icount++;
+						 	$product_id = $pproduct->getData('product_id');
+						 	
+						 	$product = Mage::getModel('catalog/product')->load($product_id);
+						 	$status = $product->getStatus();
+
+						 	//Mage::log("PRODUCT STATUS : ".$status); 
+						 	
+								$value = 
+								$product
+								->getPrice();
+
+						 	 	$isaddon = 
+						 	 	$product
+						 	 	->getResource()
+						 	 	->getAttribute('crowdfund_isaddon')
+						 	 	->getFrontend()
+						 	 	->getValue($product);
+						 	 
+							if($status==1 && $isaddon=="Yes"){
+								if( $isodd == 0){
+									 $isodd = 1;
+									 $is_odd = " oddrow";
+								}else{
+									 $isodd = 0;
+									 $is_odd = " evenrow";
+								}
+						 ?>
+							 <div class="project-product-wrapper<?php echo $is_odd; ?>">
+							 	<div id="sel">
+							 	<div class="pimage">
+							 		<img src="<?php echo $this->helper('catalog/image')->init($product, 'small_image')->resize(135); ?>" width="135" height="135" alt="<?php echo $this->stripTags($this->getImageLabel($product, 'small_image'), null, true) ?>" />
+							 	</div>	
+							 	<?php echo  Mage::helper('core')->currency($value, true, false) ?>+</div>
+							 	<div id="name"><?php echo $product->getName(); ?></div>
+							 	<div id="short-description"><?php echo $product->getShortDescription(); ?></div>
+							 		<div class="children-wrapper">
+							 		<?php
+							 			//cycle associated  bundle products
+							 			$children = $product->getTypeInstance(true)->getChildrenIds($product->getId(), false);
+							 			//Mage::log($children);
+							 			if($product->getTypeId()==='bundle'){
+							 			foreach($children as $child=>$val){
+
+							 				$id_val = array_values($val);
+							 				//Mage::log($id_val[0]);
+							 				//get child description
+							 				$child_product = Mage::getModel('catalog/product')->load($id_val);
+
+							 				?>
+							 				
+							 				<div id="cp_name">Product Name <?php echo $child_product->getName(); ?> </div>
+
+									
+							 			<? };
+							 			};
+
+							 		 ?>
+							 		</div>
+
+							<div class="clear">&nbsp;</div>
+							</div>
+						<?php }; ?>
+						 
+					<?php } ?>
+
+		</div>
+        
+               
+	            
+		</div>
+    </div>
+    
+    
+	<div id="project_right_column">
+		<div id="backers">
+			<span><?php echo Mage::helper('crowdfund')->backerscount($project_id); ?></span>
+	        <div class="sub">backers</div>
+		</div>
+		<div id="project_pledged">
+			<span><?php  echo Mage::helper('core')->currency(Mage::helper('crowdfund')->pledgedamount($project_id), true, false); ?></span>
+            <div class="sub">pledged of <?php echo Mage::helper('core')->currency($project_goal, true, false); ?> goal</div>
+		</div>
+		<div id="days_to_go">
+			<span><?php echo Mage::helper('crowdfund')->daystogocount($project_end_date); ?></span>
+          <div class="sub">days to go</div>  
+		</div>
+		<?php
+		//check if there
+			$has_pledge_in_cart = false;
+			$_items = Mage::getSingleton('checkout/session')->getQuote()->getAllVisibleItems();
+		      foreach ($_items as $item) {
+		          $_incartsku = $item->getSku();
+		          if ($_incartsku== "pledge-prd"){
+		            //
+		          	$has_pledge_in_cart = true;
+		            Mage::log("pledge ID : ".$item->getId());
+		            
+		           /* $bundled_product = Mage::getModel('catalog/product');
+		            $bundled_product->load($item->getId());*/
+
+		            $_sproduct = Mage::getModel('catalog/product')->load($item->getProduct()->getId());
+
+
+		            $project_edit_id = $_sproduct->getResource()
+		              ->getAttribute('crowdfund_projectid')
+		              ->getFrontend()
+		              ->getValue($_sproduct);
+
+		              Mage::log($project_edit_id);
+		            if($project_edit_id == $project_id){
+		              //redirect to the correct page for edit;
+		              $goto = Mage::getUrl('Projects/project/support/')."id/".$project_edit_id;
+		             
+		             /* exit();
+		              break; */
+
+		           }
+
+		            //
+
+		          }
+		      }
+
+
+
+		      Mage::log("HAS PLEDGE IN CART ? ".$has_pledge_in_cart);
+		//end check
+		 ?>
+		 <?php //check user purchase history, only pledge once per project 
+			Mage::log('START USER LOGGED IN');
+			Mage::log(Mage::getSingleton('customer/session')->isLoggedIn());
+			if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+				
+
+				$purcahsehistorymodel = Mage::getModel('crowdfund/orders')->getCollection();
+				$purcahsehistorymodel->addFieldToFilter('customer_email',$customerEmail);
+				$purcahsehistorymodel->addFieldToFilter('project_id',$project_id);
+
+
+				//check module settings if multiple allowed
+				$crowdfundconfig =  Mage::getStoreConfig('crowdfundsettings');
+
+				Mage::log('Crowdfund Config : ');
+				Mage::log($crowdfundconfig);
+
+				Mage::log('IS LOGGED IN COUNT OCCU :');
+				//Mage::log(count($purcahsehistorymodel));
+				if(!$crowdfundconfig['config']['can_back_multiple']){
+					if(count($purcahsehistorymodel)){
+						$can_purchase = 0;
+						$project_addons = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).Mage::app()->getRequest()->getModuleName()."/project/addons/id/".$project_id;;
+					}
+				}
+				
+			}
+
+
+		?>
+		<div id="back_project">
+	<?php if($can_purchase){ ?>
+			<?php if($has_pledge_in_cart==false){ ?>
+			<a href="<?php echo $project_add ?>" class="back-project-btn">Back this Project <span>$1 dollar minimum pledge</span></a>
+		<?php }else{ ?>
+			<a href="<?php echo $goto ?>" class="back-project-btn">Already backing a project in your cart <span>Click here to edit your pledge</span></a>
+			<a href="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK)."checkout/onepage/" ?>" class="cart-project-btn">Click Here to <span>finish checking out</span></a>
+		<?php } ?>
+	<?php }else{ ?>
+			
+	<a href="<?php echo $project_addons ?>" class="back-project-btn">You can only back the project once <span>Click Here to Purchase Add Ons</span></a>
+	<?php }; ?>
+		
+		</div>
+		<div id="creator_bio">
+			<!-- {creator bio helper} -->
+		</div>
+	</div>
+	
+    <div class="clear">&nbsp;</div>
+</div>
+<div class="clear">&nbsp;</div>

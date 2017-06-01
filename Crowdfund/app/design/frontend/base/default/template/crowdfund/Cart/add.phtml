@@ -1,0 +1,458 @@
+<?php 
+	$project_id = Mage::app()->getRequest()->getParam('id');
+	$project = Mage::getModel('crowdfund/crowdfundmodel')->load($project_id);
+	//$project->
+	$project_add = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).Mage::app()->getRequest()->getModuleName()."/support/index/id/".$project_id;
+	$_helper = $this->helper('catalog/output');
+
+
+?>
+<?php
+				//is this project already in the cart?
+				
+$items = Mage::getSingleton('checkout/session')->getQuote()->getAllVisibleItems();
+$foundpledge = 0;
+$formaction = $this->getUrl('Projects/project/addprojecttocart/');
+$pledge_price = "$1.00";
+
+$submitButtonLanguage = "Continue";
+$incart_array = array();
+foreach ($items as $item) {
+	Mage::log($item->getSku());
+	$incartsku = $item->getSku();
+
+
+	if ($incartsku== "pledge-prd"){
+		$foundpledge = 1;
+		
+		//Mage::Log($item);
+		//get the value of the project id
+
+		//get the product id
+		/*$bundled_product = Mage::getModel('catalog/product');
+        $bundled_product->load($id);
+
+         $_sproduct = Mage::getModel('catalog/product')->load($item->getProduct()->getId());
+
+
+		$project_edit_id = $_sproduct->getResource()
+			->getAttribute('crowdfund_projectid')
+			->getFrontend()
+			->getValue($_sproduct);
+		if($project_edit_id != $project_id){
+			//redirect to the correct page for edit;
+			$redir = $this->getUrl('Projects/project/support')."id/".$project_edit_id;
+			$this->_redirectUrl($redir);
+			break; 
+
+		}*/
+
+		//set update action for form
+		$formaction = $this->getUrl('Projects/project/editprojectincart/');
+		$submitButtonLanguage = "Edit my pledge";
+
+		//get pledge price
+		$pledge_price = Mage::helper('core')->currency($item->getPrice(),true,false);
+
+		//break;/**/
+	}
+	//get bundle sku
+	$_product = Mage::getModel('catalog/product')->load($item->getProduct()->getId());
+	$product_type = $_product->getTypeId();
+	//if($product_type==="bundle"){
+
+		//$incart_array[$_product->getSku()] = $_product->getSku();
+		$incart_array[$_product->getSku()] = array($_product->getSku(),$item->getQty(),$item->getPrice());
+
+
+	//}
+}
+
+
+?>
+<script language="javascript" >
+	j = jQuery.noConflict();
+
+	function calcval(val){
+		//alert(val)
+		selamount = document.getElementById("pidamount_"+val).value;
+		pamount = document.getElementById("p_amount").value;
+
+		numsel = Number(selamount.replace("$",""));
+		amount = Number(pamount.replace("$",""));
+
+		
+		if(amount<numsel){
+			document.getElementById("p_amount").value = "$"+parseFloat(numsel).toFixed(2);
+		}
+		/*if(){
+			
+		}*/
+
+
+
+	}
+	function calcvaladdon(n,nn){
+		alert(val)
+		selamount = document.getElementById("addon_"+n).value*nn;
+		pamount = document.getElementById("p_amount").value;
+
+		numsel = Number(selamount.replace("$",""));
+		amount = Number(pamount.replace("$",""));
+
+		
+		if(amount<numsel){
+			document.getElementById("p_amount").value = "$"+parseFloat(numsel).toFixed(2);
+		}
+		/*if(){
+			
+		}*/
+
+
+
+	}
+	/*function iscredit(source){
+		pamount = document.getElementById("p_amount").value;
+		pamount.replace('$',"");
+		addonamount = document.getElementById(source).value;
+		
+		if(pamount<addonamount){
+			newpledgeamount = pamount+addonamount;
+			
+			document.getElementById("p_amount").value = "$"+parseFloat(newpledgeamount).toFixed(2);
+		}
+		
+		
+		
+		
+	}*/
+	
+
+</script>
+<script>
+	var $j = jQuery.noConflict(); 
+
+	initfirststep = 0;
+
+	$j(document).ready(function() {
+    $j('.project_nav_support .tab-links a').on('click', function(e)  {
+        var currentAttrValue = $j(this).attr('href');
+ 		//alert(currentAttrValue);
+        // Show/Hide Tabs
+        $j('.project_nav_support ' + currentAttrValue).show().siblings().hide();
+ 
+        // Change/remove current tab to active
+        
+        $j(this).parent('li').addClass('pro-active-grey').siblings().removeClass('pro-active-grey');
+ 
+        e.preventDefault();
+    });
+});
+
+
+</script>
+
+<div id="project-title"><?php echo $project->getData('project_name') ?> </div>
+<div id="project-wrapper"> 
+  
+  <div id="project-content">
+    <?php //Pledge add to cart area ?>
+    <div id="formwrapper">
+      <form action="<?php echo $formaction ?>" id="pledgeform" class="pledgeform" name="pledge-form" method="post">
+        <div id="pledge">
+          <label>Enter your pledge amount</label>
+          <input id="p_amount" name="p_amount" type="text" class="input-text validate-text required-entry " value="<?php echo $pledge_price; ?>" />
+          <!-- validate-currency-dollar --> 
+        </div>
+        <div class="project_nav_support">
+          <ul class="tab-links">
+            <!-- <li class="pro-active"><a href="#projecthome" >Home</a></li> --> 
+            <!-- <li><a href="#backers" >Backers</a></li>
+                <li><a href="#comments" >Comments</a></li> -->
+            <li id="li_product_select" class="pro-active-grey">Select Rewards</li>
+            <li id="li_addon_select">Select Addons</li>
+          </ul>
+          
+         <div class="separator">&nbsp;</div>
+         <div id="project-support"> 
+         
+          <div id="product-select" class="tab active">
+            <?php //cycle product selection here ?>
+            <div id="alert-message"></div>
+            <span class="sec-name">Select your reward</span>
+            <div class="project-product-wrapper">
+              <input name="pidamount_0" id="pidamount_0" type="hidden" value="<?php echo  Mage::helper('core')->currency(0, true, false) ?>" />
+              <div id="sel">
+                <input name="pid" type="radio" class="validate-rewards-level" value="no_reward"  />
+                No Reward</div>
+              <div id="name"></div>
+              <div id="short-description">No Thanks, I just want to help the project</div>
+              <div class="clear">&nbsp;</div>
+            </div>
+            <?php	
+						 //get product collection associated with project
+						 $productcollection = Mage::getModel('crowdfund/projectproducts')
+						 ->getCollection()
+						 ->setOrder('position', 'ASC');
+						 $productcollection->addFieldToFilter('project_id',$project_id);
+
+						 $icount = 0;
+						 $isodd = 0;
+						 $count = count($productcollection);
+						 Mage::log($count);
+						 foreach($productcollection as $pproduct){
+						 	$icount++;
+						 	$product_id = $pproduct->getData('product_id');
+						 	
+						 
+						 	$product = Mage::getModel('catalog/product')->load($product_id);
+						 	$status = $product->getStatus();
+
+						 	//Mage::log("PRODUCT STATUS : ".$status); 
+						 	
+								$value = 
+								$product
+								->getResource()
+								->getAttribute('crowdfundminpledge')
+								->getFrontend()
+								->getValue($product);
+
+						 	 	$isreward = 
+						 	 	$product
+						 	 	->getResource()
+						 	 	->getAttribute('crowdfund_isreward')
+						 	 	->getFrontend()
+						 	 	->getValue($product);
+						 	 
+							if($status==1 && $isreward=="Yes"):
+								$option_sku = $product->getSku();
+								//select if item is in the cart;
+
+							if( $isodd == 0){
+									 $isodd = 1;
+									 $is_odd = " oddrow";
+								}else{
+									 $isodd = 0;
+									 $is_odd = " evenrow";
+								}
+								
+						 ?>
+            <div class="project-product-wrapper<?php echo $is_odd; ?>">
+              <div id="sel">
+                <input name="pidamount_<?php echo $icount ?>" id="pidamount_<?php echo $icount ?>" type="hidden" value="<?php echo  Mage::helper('core')->currency($value, true, false) ?>" />
+                <input name="pid" onClick="calcval(<?php echo $icount?>)" <?php if($icount==$count): ?>class="validate-rewards-level"<?php endif ?> type="radio" value="<?php echo $product_id  ?>" <?php 
+
+							 		foreach($incart_array as $sku=>$val){
+							 			if($option_sku==$val[0]){
+							 				echo " checked ";
+							 			}
+							 		}
+
+							 	 ?> />
+                <?php echo  Mage::helper('core')->currency($value, true, false) ?>+</div>
+                <div class="addonimage"> 
+                	<img src="<?php echo $this->helper('catalog/image')->init($product, 'small_image')->resize(80); ?>" width="80" height="80" alt="<?php echo $this->stripTags($this->getImageLabel($product, 'small_image'), null, true) ?>" />
+                </div>
+              <div id="name"><?php echo $product->getName(); ?></div>
+              <div id="short-description"><?php echo $product->getShortDescription(); ?></div>
+              <div class="clear">&nbsp;</div>
+            </div>
+            <?php endif; ?>
+            <?php } ?>
+            <input name="pledgeproject_id" type="hidden" id="pledgeproject_id" value="<?php echo $project_id ?>" />
+          <div class="clear">&nbsp;</div>
+          </div>
+          
+          
+          
+          
+          
+          
+          
+          
+          <div class="clear"></div>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          <div id="addon-select" class="tab"> <span class="sec-name">Add Ons</span>
+            <?php 
+				//does this project have any add-on products?
+				$addons = Mage::getModel('crowdfund/projectproducts')
+						 ->getCollection()
+						 ->setOrder('position', 'ASC');
+				$addons->addFieldToFilter('project_id',$project_id);
+				$addonArray = array();
+
+						 
+						 foreach($addons as $addon){
+						 	$addon_id = $addon->getData('product_id');//getProductId();
+							Mage::log("AddOn ID : ".$addon_id);
+							
+							//echo $addon_id."<br />";
+
+							$addonProduct = Mage::getModel('catalog/product')->load($addon_id);
+						 	
+						 	$inStock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($addonProduct)->getIsInStock();
+						 	Mage::log('STOCK : '.$inStock);
+						 	if($inStock){
+							 	
+							 	//get the is add on attribute
+							 	$isaddon = $addonProduct->getResource()
+							 	 	->getAttribute('crowdfund_isaddon')
+							 	 	->getFrontend()
+							 	 	->getValue($addonProduct);
+							 	//if is add on render to div
+							 	 	//echo $isaddon."<br />";
+							 	if($isaddon==="Yes"){
+							 		$addonArray[] = array('price'=>$addonProduct->getPrice(),'id'=>$addonProduct->getId(),'name'=>$addonProduct->getName(),'sku'=>$addonProduct->getSku(),"instock"=>$addonProduct->getStockItem(),"image"=>$addonProduct->getImageUrl());
+
+							 }
+							}
+						 }
+				$cnt = 0;
+				foreach($addonArray as $i){
+					$cnt++;
+					//echo $cnt."<br />";
+				}
+
+            ?>
+            <?php if($cnt>0): ?>
+            <div id="a_select">Select</div>
+            <div id="a_img">&nbsp;</div>
+            <div id="a_qty">Quantity</div>
+            <div id="a_name">Addon Name</div>
+        	<?php else: ?>
+        	<div id="noaddons">There are no addons for this project. Please continue to next step</div>
+        	<?php endif; ?>
+           
+            <div class="addons">
+              <?php 
+						$isodd = 0;
+						foreach($addonArray as $_addonproduct):
+
+							if( $isodd == 0){
+									 $isodd = 1;
+									 $is_odd = " oddrow";
+								}else{
+									 $isodd = 0;
+									 $is_odd = " evenrow";
+								}
+						?>
+              <div class="add-on-wrapper<?php echo $is_odd; ?>">
+                <div class="sel">
+                  <input name="addon_<?php echo $_addonproduct['id']; ?>" id="addonprice_<?php echo $_addonproduct['price']; ?>" type="hidden"  onChange="calcvaladdon(<?php echo $_addonproduct['id']; ?>,<?php echo $_addonproduct['price']; ?>)" value="<?php $_addonproduct['price'] ?>" />
+                  <input class="addon_sel"name="addonid[]" id="addonid_<?php echo $_addonproduct['id']; ?>" type="checkbox" <?php 
+
+                //add check here
+                	foreach($incart_array as $sku=>$val){
+							 			if($_addonproduct['sku']==$val[0]){
+							 				echo ' checked="CHECKED" ';
+							 			}
+							 		}
+
+                ?>value="<?php echo $_addonproduct['id']; ?>" />
+                <?php 
+                	$productimage = Mage::getModel('catalog/product')->load($_addonproduct['id']);
+                ?>
+               
+                </div>
+                <div class="addonimage"> 
+                	<img src="<?php echo $this->helper('catalog/image')->init($productimage, 'small_image')->resize(80); ?>" width="80" height="80" alt="<?php echo $this->stripTags($this->getImageLabel($productimage, 'small_image'), null, true) ?>" />
+                </div>
+                <input class="addon_qty" name="addon_<?php echo $_addonproduct['id'];  ?>" id="addon_<?php echo $_addonproduct['id']; ?>" onChange="calcvaladdon(<?php echo $_addonproduct['id']; ?>,<?php echo $_addonproduct['price']; ?>)" style="width: 25px;" value="<?php 
+
+							 	 foreach($incart_array as $sku=>$val){
+							 				Mage::log("SKU VAL : ".$val[1]);
+								 			if($_addonproduct['sku']==$val[0]){
+								 				
+								 				echo $val[1];
+								 				
+								 			}
+							 			
+							 		}
+							 		  ?>" type="text">
+                <div class="addon-price"> + <?php echo Mage::helper('core')->currency($_addonproduct['price'],true,false); ?> </div>
+                <div class="addon-name"> <?php echo $_addonproduct['name']; ?> </div>
+                <div class="clear">&nbsp;</div>
+              </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          
+          
+          
+          
+          
+          </div> 
+        </div>
+      </form>
+     
+      <div id="send">
+      	<a href="#" onclick="prevStep(this)" id="previous-button" class="crowdfund-submit hideme">Previous</a>
+        <input id="hideit" type="text" style="display:none !important;" value="" name="hideit">
+        <a href="#" onclick="nextStep(this)" class="crowdfund-submit"><?php echo $submitButtonLanguage; ?></a> </div>
+
+        <!--  </div> -->
+      <script type="text/javascript">
+				//<![CDATA[
+				    var pledgeform = new VarienForm('pledgeform', true);
+				    $('p_amount').observe('keypress', bindLoginPost);
+				    /*$('login-password').observe('keypress', bindLoginPost);
+				    */function bindLoginPost(evt){
+				        if (evt.keyCode == Event.KEY_RETURN) {
+				             
+				            pledgeform.submit();
+				        }
+				    }
+				    function prevStep(button){
+				    	var currentAttrValue = '#product-select';//$j(this).attr('href');
+ 							
+					        // Show/Hide Tabs
+						        $j('.project_nav_support ' + currentAttrValue).show().siblings().hide();
+						        $j('#li_product_select').addClass('pro-active-grey').siblings().removeClass('pro-active-grey');
+						        $j('#previous-button').addClass('hideme');
+					        	$j('#previous-button').removeClass('showme');
+					        	initfirststep=0;
+				        	
+				    }
+				    function nextStep(button){
+				        if(initfirststep==0){
+				        	//show the next tab
+				        	var currentAttrValue = '#addon-select';//$j(this).attr('href');
+ 							if(pledgeform.validator &&  pledgeform.validator.validate()){
+					        // Show/Hide Tabs
+						        $j('.project_nav_support ' + currentAttrValue).show().siblings().hide();
+						        $j('#li_addon_select').addClass('pro-active-grey').siblings().removeClass('pro-active-grey');
+						        $j('#previous-button').addClass('showme');
+						        $j('#previous-button').removeClass('hideme');
+					        	
+					        	initfirststep=1;
+				        	}
+				        }else{
+
+					        if(pledgeform.validator &&  pledgeform.validator.validate()){
+					            //alert('!');
+					           button.disabled = true;
+					           pledgeform.submit();
+					        }
+				    	}
+				    }
+				//]]>
+				</script> 
+    </div>
+  </div>
+  <div id="project_right_column">
+    <!-- <div id="project-notice"> <span>Important info</span> </div>
+    <div id="project-faq"> <span>faq</span> </div> -->
+  </div>
+  <div id="backers"> </div>
+  <div id="comments"> </div>
+  <div class="clear">&nbsp;</div>
+</div>
+<div class="clear">&nbsp;</div>

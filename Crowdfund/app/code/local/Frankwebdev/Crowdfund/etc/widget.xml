@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widgets>
+    <crowdfund type="crowdfund/latestprojects">
+        <name>Latest Projects</name>
+        <description type="desc">Adds a project grid with the latest x amount of projects</description>
+        <parameters>
+            <pcount>
+                <label>Max Count Display</label>
+                <visible>1</visible>
+                <required>1</required>
+                <type>text</type>
+            </pcount>
+
+        </parameters>
+        <template translate="lablel">
+            <values>
+                <default translate="label">
+                    <value>crowdfund/widget/latestprojects.phtml</value>
+                    <label>Latest x projects</label>
+
+                </default>
+            </values>
+        </template>
+    </crowdfund>
+    <crowdfund_featured_project type="crowdfund/featuredproject">
+        <name>Featured Project</name>
+        <description type="desc">Add a featured project to a page</description>
+        <parameters>
+            <projectid>
+                <label>Project ID</label>
+                <visible>1</visible>
+                <required>1</required>
+                <type>text</type>
+            </projectid>
+
+        </parameters>
+        <template translate="lablel">
+            <values>
+                <default translate="label">
+                    <value>crowdfund/widget/featuredproject.phtml</value>
+                    <label>Latest x projects</label>
+
+                </default>
+            </values>
+        </template>
+    </crowdfund_featured_project>
+</widgets>

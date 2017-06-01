@@ -1,0 +1,286 @@
+<?php 
+
+//add ons
+	$project_id = Mage::app()->getRequest()->getParam('id');
+	$project = Mage::getModel('crowdfund/crowdfundmodel')->load($project_id);
+	//$project->
+	$project_add = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).Mage::app()->getRequest()->getModuleName()."/support/index/id/".$project_id;
+
+
+
+?>
+
+<?php
+				//is this project already in the cart?
+				
+$items = Mage::getSingleton('checkout/session')->getQuote()->getAllItems();
+$foundpledge = 0;
+$formaction = $this->getUrl('Projects/project/addaddonstocart/');
+$pledge_price = "$1.00";
+
+$submitButtonLanguage = "Continue";
+$incart_array = array();
+foreach ($items as $item) {
+	Mage::log("ADDON : ".$item->getSku());
+	$incartsku = $item->getSku();
+
+
+	//get bundle sku
+	$_product = Mage::getModel('catalog/product')->load($item->getProduct()->getId());
+	$product_type = $_product->getTypeId();
+
+	$isaddon = 
+		$_product
+		->getResource()
+		->getAttribute('crowdfund_isaddon')
+		->getFrontend()
+		->getValue($_product);
+
+
+
+
+
+
+
+	if($isaddon==="Yes"){
+
+		$incart_array[$_product->getSku()] = array($_product->getSku(),$item->getQty(),$item->getPrice());
+
+
+
+	}
+}
+
+Mage::log('ADDONS IN CART ARRAY : ');
+Mage::log($incart_array);
+
+?>
+
+<script language="javascript" >
+	j = jQuery.noConflict();
+
+	function calcval(val){
+		//alert(val)
+		selamount = document.getElementById("pidamount_"+val).value;
+		pamount = document.getElementById("p_amount").value;
+
+		numsel = Number(selamount.replace("$",""));
+		amount = Number(pamount.replace("$",""));
+
+		
+		if(amount<numsel){
+			document.getElementById("addon_qty_").value = "$"+parseFloat(numsel).toFixed(2);
+		}
+		/*if(){
+			
+		}*/
+
+
+
+	}
+
+	function calccredit(id,priceid){
+		
+		pamount = document.getElementById("p_amount").value;
+		itemcount = document.getElementById(id).value;
+		itemprice = document.getElementById(priceid).value;
+
+		
+		pxa = itemcount*Number(itemprice.replace('$',""));
+		calc =Number(pamount.replace("$",""))-pxa;
+
+		//alert(pamount+" "+itemcount+" "+itemprice);
+		if(calc<0){
+			document.getElementById("p_amount").value = "$"+parseFloat(0).toFixed(2);
+		}else{
+			document.getElementById("p_amount").value = "$"+parseFloat(calc).toFixed(2);
+		}
+
+	}
+	
+
+</script>
+<div id="project-title"><?php echo $project->getData('project_name') ?>
+</div>
+<div id="project-wrapper">
+	<!-- <div class="project_nav">
+		<ul>
+			<li><a href="#" class="pro-active">Home</a></li>
+			<li><a href="#" class="pro-nactive">Backers</a></li>
+			<li><a href="#" class="pro-nactive">Comments</a></li>
+
+		</ul>
+        
+	</div> -->
+    <!-- <div class="separator">&nbsp;</div> -->
+	<div id="project-content">
+    		<?php //Pledge add to cart area ?>
+    		<div id="formwrapper">
+    			<form action="<?php echo $formaction ?>" id="pledgeform" name="pledge-form" method="post">
+				  <div id="pledge">
+                  <label>Remaining Credit</label>
+					<?php 
+					//get customer credit?
+					$user = Mage::getSingleton('customer/session')->getCustomer();
+
+					Mage::log('Addons/USER EMAIL : '.$user->getEmail(),null,'crowdfund.log');
+
+
+					$customercreditmodel = Mage::getModel('crowdfund/customercredit')
+					->getCollection()
+					->addFieldToFilter('project_id',$project_id)
+					->addFieldToFilter('customer_email',$user->getEmail());
+
+					$cr_amount = $customercreditmodel->getData();
+					
+					foreach($customercreditmodel as $i){	
+						$creditamount = $i->getData('credit_amount');
+					}
+
+					//calc remaining credit from cart
+					$count = 0;$price=0;
+					
+					foreach($incart_array as $sum=>$val){
+						$count = $val[1]*$val[2];
+						$price += $count;
+												
+
+					}
+				
+					$creditamount = $creditamount-$price;
+
+
+					?><input id="p_amount" name="c_amount" type="text" class="input-text validate-text required-entry " readonly value="<?php echo Mage::helper('core')->currency($creditamount, true, false); ?>" /><!-- validate-currency-dollar -->
+                   </div>
+                    <div id="product-select">
+                        <?php //cycle product selection here ?>
+                        <div id="alert-message"></div>
+                         <label>Select Addons</label>
+                         <div class="project-product-wrapper">
+                         	
+						 	
+	<div class="clear">&nbsp;</div>
+						 </div><div id="a_qty">Quantity</div><div id="a_name">Addon Name</div>
+                         <?php	
+						 //get product collection associated with project
+						 $productcollection = Mage::getModel('crowdfund/projectproducts')
+						 ->getCollection()
+						 ->setOrder('position', 'ASC');
+						 $productcollection->addFieldToFilter('project_id',$project_id);
+
+						 $icount = 0;
+
+						 $count = count($productcollection);
+						 Mage::log($count);
+						 foreach($productcollection as $pproduct){
+						 	$icount++;
+						 	$product_id = $pproduct->getData('product_id');
+						 	
+						 	
+						 	$product = Mage::getModel('catalog/product')->load($product_id);
+						 	$status = $product->getStatus();
+
+						 	//Mage::log("PRODUCT STATUS : ".$status); 
+						 	
+								$value = 
+								$product
+								->getResource()
+								->getAttribute('crowdfundminpledge')
+								->getFrontend()
+								->getValue($product);
+
+						 	 	$isaddon = 
+						 	 	$product
+						 	 	->getResource()
+						 	 	->getAttribute('crowdfund_isaddon')
+						 	 	->getFrontend()
+						 	 	->getValue($product);
+						 	 
+							if($status==1 && $isaddon=="Yes"):
+								$option_sku = $product->getSku();
+								//select if item is in the cart;
+								
+						 ?>
+							 <div class="project-product-wrapper">
+							 	<div id="sel">
+							 		
+							 		<input name="pidamount_<?php echo $product_id  ?>"  id="pidamount_<?php echo $product_id  ?>" type="hidden" value="<?php echo  Mage::helper('core')->currency($product->getPrice(), true, false) ?>" />
+							 		
+						 	   </div><input name="addon_qty_<?php echo $product_id  ?>" id="addon_qty_<?php echo $product->getId(); ?>" style="width: 25px;" onChange="calccredit('addon_qty_<?php echo $product_id ?>','pidamount_<?php echo $product_id  ?>')" value="<?php 
+
+							 	 foreach($incart_array as $sku=>$val){
+							 				Mage::log($val[0]);
+								 			if($option_sku==$val[0]){
+								 				
+								 				echo $val[1];
+								 				
+								 			}
+							 			
+							 		}
+							 		  ?>" type="text">
+							 	 <div class="addon-price"><?php echo  Mage::helper('core')->currency($product->getPrice(), true, false) ?>+</div>
+							 	<div id="name"><?php echo $product->getName(); ?></div>
+							 	<div id="short-description"><?php echo $product->getShortDescription(); ?></div>
+
+							<div class="clear">&nbsp;</div>
+							</div>
+						<?php endif; ?>
+						 
+					<?php } ?>
+                    
+                    <input name="pledgeproject_id" type="hidden" id="pledgeproject_id" value="<?php echo $project_id ?>" />
+                    </div>
+                    
+				</form>
+				
+
+				<div id="send">
+                    	<input id="hideit" type="text" style="display:none !important;" value="" name="hideit">
+                    	
+                    	<a href="#" onclick="nextStep(this)" class="crowdfund-submit"><?php echo $this->__($submitButtonLanguage); ?></a>
+                    </div>
+				<script type="text/javascript">
+				//<![CDATA[
+				    var pledgeform = new VarienForm('pledgeform', true);
+				   // $('c_amount').observe('keypress', bindLoginPost);
+				    /*$('login-password').observe('keypress', bindLoginPost);
+				    */
+				   /* function bindLoginPost(evt){
+				        if (evt.keyCode == Event.KEY_RETURN) {
+				             
+				            pledgeform.submit();
+				        }
+				    }*/
+				    function nextStep(button){
+				       //if(pledgeform.validator &&  pledgeform.validator.validate()){
+				            //alert('!');
+				           //button.disabled = true;
+				           pledgeform.submit();
+				       // }
+				    }
+				//]]>
+				</script>
+    		</div>
+
+
+
+
+	</div>
+	<div id="project_right_column">
+		<div id="project-notice">
+			<span>Important info</span>
+	        
+		</div>
+		<div id="project-faq">
+			<span>faq</span>
+           
+		</div>
+		
+	</div>
+	<div id="backers">
+	</div>
+	<div id="comments">
+	</div>
+    <div class="clear">&nbsp;</div>
+</div>
+<div class="clear">&nbsp;</div>

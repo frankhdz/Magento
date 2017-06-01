@@ -1,0 +1,32 @@
+<?php
+//featured project widget
+$project_id = $this->getProjectId();
+
+$projectcollection = Mage::getModel('crowdfund/crowdfundmodel')
+->getCollection()
+->setPageSize(1)
+->addFieldToFilter('id',$project_id)
+->getFirstItem();
+
+$pct  = Mage::helper('crowdfund')->fundingGoalPercent($projectcollection->getData('id'),$projectcollection->getData('goal'));
+$project_path = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB)."Projects/project/index/id/".$projectcollection->getData('id');
+?>
+<div id="crowdfund-featured-project-widget">
+	<div id="title"><h1>Featured Project<h1></div>
+	<div id="featured-wrapper">
+		<div id="w-l-col"><a href="<?php echo $project_path ?>"><img src="<?php echo str_replace(' ','_', Mage::helper('crowdfund')->resizeImage($projectcollection->getData('project_image'), 300, 300, 'projects')); ?>" alt="resized image" /></a></div>
+		<div id="w-r-col">
+			<div id="project-name"><a href="<?php echo $project_path; ?>"><?php echo $projectcollection->getData('project_name') ?></a></div>
+			<div id="author"></div>
+			<div id="desc"><?php echo $projectcollection->getData('project_short_description') ?></div>
+			<div id="funding-details">
+				<div id="funded"><?php echo round($pct) ?>% Funded  <?php 
+				echo Mage::helper('core')->currency(Mage::helper('crowdfund')->pledgedamount($projectcollection->getData('id')), true, false) ?> of <?php echo Mage::helper('core')->currency($projectcollection->getData('goal'), true, false); ?></div>
+			</div>
+			<div id="progress-bar-background">
+				<div id="progress" style ='width: <?php echo $pct ?>%' > </div>
+			</div>
+		</div>
+	</div>
+<br class="clear" />
+</div>

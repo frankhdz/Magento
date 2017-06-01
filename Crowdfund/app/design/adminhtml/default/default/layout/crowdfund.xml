@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+  
+<crowdfund_adminhtml_crowdfundmodel_related>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="crowdfund/adminhtml_form_edit_tab_grid" name="productsmodel.grid"/>
+            <block type="adminhtml/widget_grid_serializer" name="grid_serializer">
+                <reference name="grid_serializer">
+                    <action method="initSerializerBlock">
+                        <grid_block_name>productsmodel.grid</grid_block_name>
+                        <data_callback>getSelectedRelatedProducts</data_callback>
+                        <hidden_input_name>links[products]</hidden_input_name>
+                        <reload_param_name>products</reload_param_name>
+                    </action>
+                    <action method="addColumnInputName"> 
+                        <input_name>position</input_name>
+                    </action>
+                </reference>
+            </block>
+        </block>
+</crowdfund_adminhtml_crowdfundmodel_related>
+
+  <crowdfund_adminhtml_crowdfundmodel_productsmodelgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="crowdfund/adminhtml_form_edit_tab_grid" name="productsmodel.grid"/>
+        </block>
+  </crowdfund_adminhtml_crowdfundmodel_productsmodelgrid>
+
+
+  <crowdfund_adminhtml_crowdfundmodel_index>
+	<reference name="content">
+		<block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher" template="store/switcher.phtml" after='content_header' >
+			<action method="setUseConfirm"><params>0</params></action>
+        </block>
+            
+	  <block type="crowdfund/adminhtml_crowdfundmodel" name="crowdfundmodel" />
+	</reference>
+  </crowdfund_adminhtml_crowdfundmodel_index>
+
+
+  <crowdfund_adminhtml_crowdfundimport_index>
+    <reference name="head">          
+                               
+               <action method="addJs"><script>crowdfund/jquery.min.js</script></action>
+                
+    </reference>
+    <reference name="content">
+        <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher" template="store/switcher.phtml" after='content_header' >
+            <action method="setUseConfirm"><params>0</params></action>
+        </block>
+      <!-- <block type="crowdfund/adminhtml_crowdfundimport" name="crowdfundimport" template="crowdfund/import.phtml"/> -->
+       <!--  <block type="crowdfund/adminhtml_form_edit_importform" name="importform"/> -->
+
+        <!-- <block type="crowdfund/adminhtml_form_importform" name="crowdfund" >
+            <block type="crowdfund/adminhtml_form_import_form" name="importform"/>
+        </block> -->
+    </reference>
+  </crowdfund_adminhtml_crowdfundimport_index>
+
+  <crowdfund_adminhtml_crowdfundimport_ajaxprojectproducts>
+    
+      <block type="crowdfund/admin_crowdfundimport" name="ajaxvalues" output="toHtml" template='crowdfund/ajax.phtml' />
+        
+    
+  </crowdfund_adminhtml_crowdfundimport_ajaxprojectproducts>
+
+</layout>

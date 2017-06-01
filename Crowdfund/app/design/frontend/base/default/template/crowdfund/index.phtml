@@ -1,0 +1,110 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php 
+ $crowdfundconfig =  Mage::getStoreConfig('crowdfundsettings');
+//load project collection
+$pageNumber = $this->getRequest()->getParam('p');
+$limit = $this->getRequest()->getParam('limit');
+if(!isset($limit)){
+	$limit = 10;
+}
+
+//get grid row count from settings
+$maxrowcount = $crowdfundconfig['config']['row_count'];
+
+$_storeid = "";
+$projects = Mage::getModel('crowdfund/crowdfundmodel')
+->getCollection()
+->setPageSize($limit)
+->setCurPage($pageNumber)
+->setOrder('id','DESC');
+?>
+<?php $_collectionSize = $projects->count() ?>
+<?php echo  $this->getPagerHtml(); ?>
+<div id="projects">
+<?php
+
+//cycle all products in store
+$firstrun = 0;
+$initrow = -1;
+$i=0;
+foreach($projects as $project):
+	//Mage::log($project->getData('project_name'));
+	$project_name = $project->getData('project_name');
+	$project_goal = $project->getData('goal');
+	$project_image = $project->getData('project_image');
+	$project_id = $project->getData('id');
+	$project_s_description = $project->getData('project_short_description');
+	$project_end_date = $project->getData('project_end');
+	$project_goal = $project->getData('goal');
+	Mage::log($project_image);
+	//echo Mage::helper('crowdfund')->resizeImage($project_image, 400, 300, 'projects');
+	$project_path = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).Mage::app()->getRequest()->getModuleName()."/project/index/id/".$project_id;
+	$pct  = Mage::helper('crowdfund')->fundingGoalPercent($project_id,$project_goal);;
+	?>
+	  <?php if ($i++%$maxrowcount==0): ?>
+	  <div class="project_row">
+	  <?php endif; ?>
+	
+	<div class="cf_project">
+		<div class="project-image">
+			<a href="<?php echo $project_path ?>"><img src="<?php echo str_replace(' ','_', Mage::helper('crowdfund')->resizeImage($project_image, 200, 200, 'projects')); ?>" alt="resized image" /></a>
+		</div>
+		<div class="project-name">
+			<a href="<?php echo $project_path ?>"><?php echo $project_name ?></a>
+		</div>
+		 <div class="project-description">
+			<?php echo $project_s_description ?>
+		</div>
+		<div class="project-location">
+			location
+		</div>
+		<?php Mage::helper('crowdfund')->fundingGoalPercent($project_id,$pct); ?>
+        <div class="project-pledged">
+			<?php echo Mage::helper('core')->currency(Mage::helper('crowdfund')->pledgedamount($project_id), true, false) ?> of <?php echo Mage::helper('core')->currency($project_goal, true, false); ?>
+		</div>
+        
+		<div class="project-funded">
+			<div class="funding-goal">
+				
+				<div class="funding-progress" style ='width: <?php echo $pct ?>%'></div>
+			</div>
+		</div>
+		<div class="project-daystogo">
+			<?php echo Mage::helper('crowdfund')->daystogocount($project_end_date); ?> days to go
+		</div> <!---->
+
+	</div>
+	<?php if ($i%$maxrowcount==0 || $i==$_collectionSize): ?>
+		</div>
+	<?php endif ?>
+	
+    
+<?php endforeach; ?>
+	<div style="clear:both"/>
+</div>
+

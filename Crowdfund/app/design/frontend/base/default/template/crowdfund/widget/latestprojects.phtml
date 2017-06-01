@@ -1,0 +1,34 @@
+<?php 
+//render latest projects widget get count from config
+$maxCount = $this->getProjectCount();
+//get the last maxcount projects and render them out
+$projects = Mage::getModel('crowdfund/crowdfundmodel')
+->getCollection()
+->setPageSize($maxCount)
+->setOrder('id','DESC');
+
+
+
+
+
+foreach($projects as $project):
+	$pct  = Mage::helper('crowdfund')->fundingGoalPercent($project->getData('id'),$project->getData('goal'));
+	$project_path = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB)."Projects/project/index/id/".$project->getData('id');
+?>
+<div id="crowdfund-latestproject-widget">
+<?php ?>
+	<div class="row">
+		<div class="l-project">
+			<div id="w-image"><a href="<?php echo $project_path ?>"><img src="<?php echo str_replace(' ','_', Mage::helper('crowdfund')->resizeImage($project->getData('project_image'), 250, 250, 'projects')); ?>" alt="resized image" /></a></div>
+			<div id="w-name"><a href="<?php echo $project_path ?>"><?php echo $project->getData('project_name') ?></a></div>
+			<div id="w-description"><?php echo $project->getData('project_short_description') ?></div>
+			<div id="w-pledged"><?php 
+				echo Mage::helper('core')->currency(Mage::helper('crowdfund')->pledgedamount($project->getData('id')), true, false) ?> of <?php echo Mage::helper('core')->currency($project->getData('goal'), true, false); ?> </div>
+			<div id="w-progress">
+				<div class="funding-progress" style ='width: <?php echo $pct ?>%'></div>
+			</div>
+		</div>
+	</div>
+<?php endforeach; ?>
+<br class="clear" />
+</div>
