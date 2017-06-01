@@ -1,0 +1,86 @@
+<div class="category-list-wrapper">
+<?php 
+#get a list of the manufacturers;
+
+ $name='manufacturer';
+    $attributeInfo = Mage::getResourceModel('eav/entity_attribute_collection')->setCodeFilter($name)->getFirstItem();
+    $attributeId = $attributeInfo->getAttributeId();
+    $attribute = Mage::getModel('catalog/resource_eav_attribute')->load($attributeId);
+    $attributeOptions = $attribute ->getSource()->getAllOptions(false); 
+    //print_r($attributeOptions);
+
+    foreach($attributeOptions as $attribute){
+    	
+    	$attarrs[]= $attribute['label'].".jpg";
+
+    }
+
+    sort($attarrs);
+
+    /*foreach($attarrs as $att=>$val){
+    	echo $val."<br />";
+    }*/
+
+?>
+
+
+
+
+<div class="category-products">
+	<ul class="products-grid">
+		<?php
+			
+
+			$categorycount = 0;
+		foreach ($attarrs as $att=>$image):
+			
+
+			
+			$filepath =  str_replace(' ','%20',Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'brands'.DS.$image);
+			
+			$url = getimagesize($filepath);
+
+
+			if(is_array($url)){
+				$immagine = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'brands'.DS.$image;
+			}else{
+				$immagine = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA)."brands".DS."image.jpg";
+			}
+
+			if ($categorycount == 0){
+				$class = "first";
+			}elseif ($categorycount == 3){
+				$class = "last";
+			}else{
+				$class = "";
+			}
+			?>
+			<div class="catalog-image">
+
+			<div>
+				<?php $params = Mage::getUrl('shopbybrand/brand', array('manufacturer'=>str_replace('.jpg', '', $image))); ?>
+
+			<a href="<?php echo $params ?>?p=1&limit=20">
+			<img src="<?php echo $immagine ?>" alt="#" width="390" height="210" />
+			</a>
+			</div>
+				
+			<div class="left"><h2><a href="<?php echo $params ?>?p=1&limit=20">
+				
+				<?php echo ucwords(str_replace('.jpg', '', $image)); ?></a></h2></div>
+
+			</div>
+			<?php
+			
+			if($categorycount == 3){
+				$categorycount = 0;
+				
+			}
+			else{
+				$categorycount++;
+			}
+			endforeach;
+			
+			?>
+		</ul>
+	</div></div>

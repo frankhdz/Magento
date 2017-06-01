@@ -1,0 +1,135 @@
+
+<div class="page-title category-title">
+        <h1>Brand - <?php echo ucwords($this->getManufacturer()); ?></h1>
+</div>
+<?php 
+
+
+$_productCollection = $this->getCollection();
+$_helper = $this->helper('catalog/output');
+
+
+
+
+
+
+
+
+
+
+//
+ ?>
+
+<br/>
+<?php if(!$_productCollection->count()): ?>
+<p class="note-msg"><?php echo $this->__('There are no products matching the selection.') ?></p>
+<?php else: ?>
+<?php echo $this->getPagerHtml(); ?>
+
+<div class="category-products">
+    <?php echo $this->getToolbarHtml() ?>
+    <?php // List mode ?>
+    
+
+    <?php // Grid Mode ?>
+
+    <?php // Grid Mode ?>
+
+    <?php $_collectionSize = $_productCollection->count() ?>
+    <?php $_columnCount = 4; ?>
+    <!-- <?php 'colcnt'.$_columnCount?> -->
+    <?php $i=0; foreach ($_productCollection as $_product): ?>
+        <?php if ($i++%$_columnCount==0): ?>
+        <ul class="products-grid row">
+        <?php endif ?>
+            <li class="item<?php if(($i-1)%$_columnCount==0): ?> first<?php elseif($i%$_columnCount==0): ?> last<?php endif; ?> col-xs-12 col-sm-4" itemscope itemtype="http://schema.org/product">
+                <div class="wrapper-hover item-min-height">
+                    <a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image" itemprop="url"><img data-src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->resize(228); ?>"  width="228" height="228" class="lazy" alt="<?php echo $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->resize(210); ?>" /></a>
+                                    <div class="product-shop">
+                                        <h2 class="product-name"><a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->stripTags($_product->getName(), null, true) ?>" itemprop="name"><?php echo $_helper->productAttribute($_product, $_product->getName(), 'name') ?></a></h2>
+                       <div class="desc_grid" itemprop="description">
+
+                                             <?php 
+                                                //XXX MIN PRICE (AS LOW AS)
+                                               // echo $_product->isConfigurable();
+                                                //check for min and max price in it's simple products
+                                                if($_product->isConfigurable()):
+
+                                                    $block = Mage::app()->getLayout()->createBlock('catalog/product_view_type_configurable');
+                                                    $block->setProduct($_product);
+                                                    $config = json_decode($block->getJsonConfig(), true);
+                                                    $basePrice = $config['basePrice'];
+                                                    $min = null;
+                                                    $max = null;
+                                                    foreach ($config['attributes'] as $aId=>$aValues){
+                                                        foreach ($aValues['options'] as $key=>$value){
+                                                            $prices[] = $value['price'];
+                                                            if (is_null($min) || $min>$value['price'] && $value['price'] != 0){
+                                                                $min = $value['price'];
+                                                            }
+                                                            if (is_null($max) || $max<$value['price']){
+                                                                $max = $value['price'];
+                                                            }
+                                                        }
+                                                    }
+
+
+                                                   
+                                                    ?>
+                                                   
+                                                <?php endif ?>
+
+
+                                        <?php 
+                                        $product_price = $_product->getPrice();
+                                       
+                                         ?>
+                                            <?php echo $this->getPriceHtml($_product, true); ?>
+                                       
+                                         
+                                        
+
+                                        <div class="actions">
+                                            <?php if($_product->isSaleable()): ?>
+                                                <?php
+                                                //if cart is a configurable or bundle go to the product page 
+                                                 //echo $_product->getProductUrl();
+                                                 ?>
+                                                 <?php if( $_product->getTypeId() == 'simple' ): ?>
+                                                   <!--  <button type="button" title="<?php echo $this->__('Add to Cart!') ?>" class="button btn-cart" onclick="setLocation('<?php echo $this->getAddToCartUrl($_product) ?>')"><i class="fa fa-shopping-cart"></i><span><span><?php echo $this->__('Add to Cart!') ?></span></span></button> -->
+                                                <?php else: ?>
+                                                      <!-- <button type="button" title="<?php echo $this->__('Add to Cart!') ?>" class="button btn-cart" onclick="location.href='<?php echo $_product->getProductUrl() ?>'"><i class="fa fa-shopping-cart"></i><span><span><?php echo $this->__('Add to Cart!') ?></span></span></button> -->
+                                                <?php endif; ?>                                                
+                                            <?php else: ?>
+                                                <p class="availability out-of-stock"><span><?php echo $this->__('Out of stock') ?></span></p>
+                                            <?php endif; ?>
+                                            <ul class="add-to-links">
+                                                <?php if ($this->helper('wishlist')->isAllow()) : ?>
+                                                    <li><a title="<?php echo $this->__('Add to Wishlist') ?>" href="<?php echo $this->helper('wishlist')->getAddUrl($_product) ?>" rel="tooltip" class="link-wishlist"><?php echo $this->__('Add to Wishlist') ?></a></li>
+                                                <?php endif; ?>
+                                                <?php if($_compareUrl=$this->getAddToCompareUrl($_product)): ?>
+                                                    <li><span class="separator">|</span> <a  title="<?php echo $this->__('Add to Compare') ?> " href="<?php echo $_compareUrl ?>" rel="tooltip" class="link-compare "><?php echo $this->__('Add to Compare') ?></a></li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                    <?php $_product = Mage::getModel('catalog/product')->load($_product->getId()); ?>
+                    <div class="label-product">             
+                        <?php if($_product->getData('new')){echo '<span class="new">'.$this->__('New').'</span>';  }?>
+                        <?php if($_product->getData('sale')){echo '<span class="sale">'.$this->__('Sale').'</span>';  }?>
+                    </div>
+                </div>
+            </li>
+        <?php if ($i%$_columnCount==0 || $i==$_collectionSize): ?>
+        </ul>
+        <?php endif ?>
+        <?php endforeach ?>
+        <script type="text/javascript">decorateGeneric($$('ul.products-grid'), ['odd','even','first','last'])</script>
+    
+
+    <div class="toolbar-bottom">
+        <?php echo $this->getToolbarHtml() ?>
+    </div>
+</div>
+<?php echo $this->getPagerHtml(); ?>
+<?php endif; ?>
